@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useState} from 'react'
 import {
   Box,
   Button,
@@ -11,73 +11,63 @@ import {
   TextField,
   Typography
 } from '@material-ui/core';
+import {IChatMessage, IFlowStep} from './Chat.interface';
 import style from './Chat.module.scss'
-import {IChatMessage, IFlowStepMessage} from './Chat.interface';
 
 
-const initialFlowStepMessages: IChatMessage[] = [{
-  "message": {
-    "id": 0,
-    "name": "",
-    "text": "Hallöchen. Ich bin ein neuer Versicherungsbot. Willkomen! Zuerst die wichtigste Frage: Gefallen Ihnen Star Wars?",
-    "uiType": "button",
-    "valueType": "boolean",
-    "valueOptions": [
-      {
-        "nextId": 50,
-        "value": true,
-        "text": "Ja"
-      },
-      {
-        "nextId": 51,
-        "value": false,
-        "text": "Nein"
-      }
-    ]
-  },
-  "participant": "bot",
-  "mediaUrl": undefined,
-  "shown": true
+const initialFlowStepMessages: IFlowStep[] = [{
+  "id": 0,
+  "name": "",
+  "text": "Hallöchen. Ich bin ein neuer Versicherungsbot. Willkomen! Zuerst die wichtigste Frage: Gefallen Ihnen Star Wars?",
+  "uiType": "button",
+  "valueType": "boolean",
+  "valueOptions": [
+    {
+      "nextId": 50,
+      "value": true,
+      "text": "Ja"
+    },
+    {
+      "nextId": 51,
+      "value": false,
+      "text": "Nein"
+    }
+  ],
+  "mediaUrl": undefined
 }, {
-  "message": {
-    "id": 50,
-    "name": "",
-    "text": "Sehr gut. In diesem Fall können wir weitermachen. Ich werde Ihnen ein paar Fragen stellen. Passt es so?",
-    "uiType": "button",
-    "valueType": "boolean",
-    "valueOptions": [
-      {
-        "nextId": 100,
-        "value": true,
-        "text": "OK"
-      },
-    ]
-  },
-  "participant": "bot",
-  "mediaUrl": undefined,
-  "shown": false
+  "id": 50,
+  "name": "",
+  "text": "Sehr gut. In diesem Fall können wir weitermachen. Ich werde Ihnen ein paar Fragen stellen. Passt es so?",
+  "uiType": "button",
+  "valueType": "boolean",
+  "valueOptions": [
+    {
+      "nextId": 100,
+      "value": true,
+      "text": "OK"
+    },
+  ],
+  "mediaUrl": undefined
 }, {
-  "message": {
-    "id": 51,
-    "name": "",
-    "text": "Das tut mir leid, aber ich denke nicht, dass ich Ihnen helfen kann. Möge die Macht mit Ihnen sein.",
-    "uiType": "button",
-    "valueType": "boolean",
-    "valueOptions": [
-      {
-        "nextId": false,
-        "value": false,
-        "text": "OK :("
-      },
-    ]
-  },
-  "participant": "bot",
-  "mediaUrl": undefined,
-  "shown": false
+  "id": 51,
+  "name": "",
+  "text": "Das tut mir leid, aber ich denke nicht, dass ich Ihnen helfen kann. Möge die Macht mit Ihnen sein.",
+  "uiType": "button",
+  "valueType": "boolean",
+  "valueOptions": [
+    {
+      "nextId": false,
+      "value": false,
+      "text": "OK :("
+    },
+  ],
+  "mediaUrl": undefined
 }]
 
 function Chat() {
-  const [chatMessages, setChatMessages] = useState<IChatMessage[]>([])
+  const [inputText, setInputText] = useState<string>('')
+  const [flowSteps, setFlowSteps] = useState<IFlowStep[]>([])
+  const [messages, setMessages] = useState<IChatMessage[]>([])
 
   /**
    * Load the initial messages
@@ -85,29 +75,40 @@ function Chat() {
   useEffect(() => {
     fetch('https://raw.githubusercontent.com/mzronek/task/main/flow.json')
       .then(data => data.json())
-      .then(loadedMessages => loadedMessages.map((message: IFlowStepMessage) => ({
-        message,
-        participant: 'bot',
-        mediaUrl: null,
-        shown: false,
-      })))
-      .then(loadedChatMessages => initialFlowStepMessages.concat(loadedChatMessages))
-      .then(allMessages => allMessages.sort((a: IChatMessage, b: IChatMessage) => a.message.id - b.message.id))
-      .then(chatMessages => setChatMessages(chatMessages))
+      .then(loadedFlowSteps => initialFlowStepMessages.concat(loadedFlowSteps))
+      .then(allFlowSteps => allFlowSteps.sort((a: IFlowStep, b: IFlowStep) => a.id - b.id))
+      .then(sortedFlowSteps => {
+        setFlowSteps(sortedFlowSteps)
+
+        // Add the 1st flow step as the initial message
+        const firstFlowStep = sortedFlowSteps[0]
+        const newMessage: IChatMessage = {
+          flowStep: firstFlowStep,
+          text: '',
+          participant: 'bot'
+        }
+        setMessages([newMessage])
+      })
   }, [])
 
-  const respond = (messageId: number | boolean) => {
-    if (messageId === false) {
-      console.log('we are done here')
-      return
+  const postBotMessage = (nextStepId: number | boolean) => {
+    const flowStep = flowSteps.find(step => step.id === nextStepId)
+    const newMessage: IChatMessage = {
+      flowStep,
+      text: '',
+      participant: 'bot'
     }
-    setChatMessages(chatMessages.map((m: IChatMessage) => {
-      if (m.message.id === messageId) {
-        return ({...m, shown: true})
-      } else {
-        return m
-      }
-    }))
+    setMessages(messages.concat([newMessage]))
+  }
+
+  const postUserMessage = (text: string) => {
+    const newMessage: IChatMessage = {
+      flowStep: undefined,
+      text,
+      participant: 'me'
+    }
+    setMessages(messages.concat([newMessage]))
+    setInputText('')
   }
 
   return (
@@ -117,8 +118,9 @@ function Chat() {
           Write our bot some stuff
         </Typography>
 
-        {chatMessages.map(chatMessage => (
-          chatMessage.shown ? (
+        {messages.map(message => {
+          const isLastMessage = message?.flowStep?.id === messages[messages.length - 1]?.flowStep?.id
+          return (
             <Card className="chat-bubble">
               <CardActionArea>
                 <CardMedia
@@ -127,26 +129,40 @@ function Chat() {
                 />
                 <CardContent>
                   <Typography variant="body2" color="textSecondary" component="p">
-                    {chatMessage.message.text}
+                    {message?.flowStep?.text ?? message.text}
                   </Typography>
                 </CardContent>
               </CardActionArea>
               <CardActions>
-                {chatMessage.message.uiType === 'button' ? (
-                  chatMessage.message.valueOptions.map(option => (
-                    <Button size="small" color="primary" onClick={() => respond(option.nextId)}>
+                {message?.flowStep?.uiType === 'button' ? (
+                  message?.flowStep?.valueOptions?.map(option => (
+                    <Button size="small" color="primary" onClick={() => postBotMessage(option.nextId)}
+                            disabled={!isLastMessage}
+                    >
                       {option.text}
                     </Button>
                   ))
                 ) : ''}
               </CardActions>
             </Card>
-          ) : null
-        ))}
+          )
+        })}
 
-        <TextField id="chat-input" label="Write your message here" fullWidth />
+        <TextField
+          id="chat-input"
+          label="Write your message here"
+          fullWidth
+          value={inputText}
+          onChange={e => setInputText(e.target.value)}
+          onKeyUp={e => {
+            if (e.key === 'Enter') {
+              postUserMessage(inputText)
+            }
+          }}
+        />
         <div className="buttons">
-          <Button className="send-button" variant="contained" color="primary">
+          <Button className="send-button" variant="contained" color="primary"
+                  onClick={(e) => postUserMessage(inputText)}>
             Send
           </Button>
         </div>

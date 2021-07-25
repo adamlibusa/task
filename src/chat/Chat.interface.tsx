@@ -1,10 +1,11 @@
-export interface IFlowStepMessage {
+export interface IFlowStep {
   id: number;
   name: string;
   text: string;
   uiType: 'button';
   valueType: 'boolean' | 'string' | 'number';
   valueOptions: IFlowStepOptions[];
+  mediaUrl?: string;
 }
 
 export interface IFlowStepOptions {
@@ -14,8 +15,7 @@ export interface IFlowStepOptions {
 }
 
 export interface IChatMessage {
-  message: IFlowStepMessage,
+  flowStep?: IFlowStep;
+  text: string;
   participant: 'bot' | 'me';
-  mediaUrl?: string;
-  shown: boolean;
 }
