@@ -3,10 +3,8 @@ import {
   Box,
   Button,
   Card,
-  CardActionArea,
   CardActions,
   CardContent,
-  CardMedia,
   Container,
   TextField,
   Typography
@@ -14,7 +12,6 @@ import {
 import {IChatMessage, IFlowStep} from './Chat.interface';
 import {finalStep, initialFlowStepMessages} from './flowStepMessages'
 import style from './Chat.module.scss'
-
 
 
 function Chat() {
@@ -86,23 +83,23 @@ function Chat() {
         </Typography>
 
         {messages.map(message => (
-          <Card className="chat-bubble">
-            <CardActionArea>
-              <CardMedia
-                image="https://material-ui.com/static/images/cards/contemplative-reptile.jpg"
-                title="Contemplative Reptile"
-              />
-              <CardContent>
-                <Typography variant="body2" color="textSecondary" component="p">
-                  {message?.flowStep?.text ?? message.text}
-                </Typography>
-              </CardContent>
-            </CardActionArea>
+          <Card className="chat-bubble" key={messages.indexOf(message)}>
+            <CardContent>
+              {message?.flowStep?.mediaUrl ? (
+                <img src={message?.flowStep?.mediaUrl} alt="Not the droids you were looking for" title="Not the droids you were looking for" />
+              ) : null}
+              <Typography variant="body2" color="textSecondary" component="p">
+                {message?.flowStep?.text ?? message.text}
+              </Typography>
+            </CardContent>
             <CardActions>
               {message?.flowStep?.uiType === 'button' ? (
                 message?.flowStep?.valueOptions?.map(option => (
-                  <Button size="small" color="primary" onClick={() => postBotMessage(option.nextId)}
-                          disabled={!isLastMessageWithFlowStep(message)}
+                  <Button
+                    key={option.value.toString()}
+                    size="small" color="primary"
+                    onClick={() => postBotMessage(option.nextId)}
+                    disabled={!isLastMessageWithFlowStep(message)}
                   >
                     {option.text}
                   </Button>
