@@ -2,9 +2,9 @@ export interface IFlowStep {
   id: number;
   name: string;
   text: string;
-  uiType: 'button';
-  valueType: 'boolean' | 'string' | 'number';
-  valueOptions: IFlowStepOptions[];
+  uiType: 'button' | 'readonly';
+  valueType?: 'boolean' | 'string' | 'number';
+  valueOptions?: IFlowStepOptions[];
   mediaUrl?: string;
 }
 

@@ -12,57 +12,10 @@ import {
   Typography
 } from '@material-ui/core';
 import {IChatMessage, IFlowStep} from './Chat.interface';
+import {finalStep, initialFlowStepMessages} from './flowStepMessages'
 import style from './Chat.module.scss'
 
 
-const initialFlowStepMessages: IFlowStep[] = [{
-  "id": 0,
-  "name": "",
-  "text": "Hallöchen. Ich bin ein neuer Versicherungsbot. Willkomen! Zuerst die wichtigste Frage: Gefallen Ihnen Star Wars?",
-  "uiType": "button",
-  "valueType": "boolean",
-  "valueOptions": [
-    {
-      "nextId": 50,
-      "value": true,
-      "text": "Ja"
-    },
-    {
-      "nextId": 51,
-      "value": false,
-      "text": "Nein"
-    }
-  ],
-  "mediaUrl": undefined
-}, {
-  "id": 50,
-  "name": "",
-  "text": "Sehr gut. In diesem Fall können wir weitermachen. Ich werde Ihnen ein paar Fragen stellen. Passt es so?",
-  "uiType": "button",
-  "valueType": "boolean",
-  "valueOptions": [
-    {
-      "nextId": 100,
-      "value": true,
-      "text": "OK"
-    },
-  ],
-  "mediaUrl": undefined
-}, {
-  "id": 51,
-  "name": "",
-  "text": "Das tut mir leid, aber ich denke nicht, dass ich Ihnen helfen kann. Möge die Macht mit Ihnen sein.",
-  "uiType": "button",
-  "valueType": "boolean",
-  "valueOptions": [
-    {
-      "nextId": false,
-      "value": false,
-      "text": "OK :("
-    },
-  ],
-  "mediaUrl": undefined
-}]
 
 function Chat() {
   const [inputText, setInputText] = useState<string>('')
@@ -92,7 +45,7 @@ function Chat() {
   }, [])
 
   const postBotMessage = (nextStepId: number | boolean) => {
-    const flowStep = flowSteps.find(step => step.id === nextStepId)
+    const flowStep = flowSteps.find(step => step.id === nextStepId) ?? finalStep
     const newMessage: IChatMessage = {
       flowStep,
       text: '',
