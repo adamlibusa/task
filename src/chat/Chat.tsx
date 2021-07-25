@@ -102,6 +102,9 @@ function Chat() {
   }
 
   const postUserMessage = (text: string) => {
+    if (!text) {
+      return
+    }
     const newMessage: IChatMessage = {
       flowStep: undefined,
       text,
@@ -111,6 +114,17 @@ function Chat() {
     setInputText('')
   }
 
+  const isLastMessageWithFlowStep = (message: IChatMessage) => {
+    const messagesWithFlowSteps = messages.filter(m => m.flowStep)
+    if (messagesWithFlowSteps.length === 0) {
+      return false
+    }
+    if (messagesWithFlowSteps[messagesWithFlowSteps.length - 1]?.flowStep?.id === message?.flowStep?.id) {
+      return true
+    }
+    return false
+  }
+
   return (
     <Container className={style.Chat}>
       <Box my={4}>
@@ -118,35 +132,32 @@ function Chat() {
           Write our bot some stuff
         </Typography>
 
-        {messages.map(message => {
-          const isLastMessage = message?.flowStep?.id === messages[messages.length - 1]?.flowStep?.id
-          return (
-            <Card className="chat-bubble">
-              <CardActionArea>
-                <CardMedia
-                  image="https://material-ui.com/static/images/cards/contemplative-reptile.jpg"
-                  title="Contemplative Reptile"
-                />
-                <CardContent>
-                  <Typography variant="body2" color="textSecondary" component="p">
-                    {message?.flowStep?.text ?? message.text}
-                  </Typography>
-                </CardContent>
-              </CardActionArea>
-              <CardActions>
-                {message?.flowStep?.uiType === 'button' ? (
-                  message?.flowStep?.valueOptions?.map(option => (
-                    <Button size="small" color="primary" onClick={() => postBotMessage(option.nextId)}
-                            disabled={!isLastMessage}
-                    >
-                      {option.text}
-                    </Button>
-                  ))
-                ) : ''}
-              </CardActions>
-            </Card>
-          )
-        })}
+        {messages.map(message => (
+          <Card className="chat-bubble">
+            <CardActionArea>
+              <CardMedia
+                image="https://material-ui.com/static/images/cards/contemplative-reptile.jpg"
+                title="Contemplative Reptile"
+              />
+              <CardContent>
+                <Typography variant="body2" color="textSecondary" component="p">
+                  {message?.flowStep?.text ?? message.text}
+                </Typography>
+              </CardContent>
+            </CardActionArea>
+            <CardActions>
+              {message?.flowStep?.uiType === 'button' ? (
+                message?.flowStep?.valueOptions?.map(option => (
+                  <Button size="small" color="primary" onClick={() => postBotMessage(option.nextId)}
+                          disabled={!isLastMessageWithFlowStep(message)}
+                  >
+                    {option.text}
+                  </Button>
+                ))
+              ) : ''}
+            </CardActions>
+          </Card>
+        ))}
 
         <TextField
           id="chat-input"
