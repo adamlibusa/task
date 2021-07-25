@@ -2,6 +2,10 @@
 
 :global {
   :local(.Chat) {
+    .chat-bubble {
+      margin-block: $padding-m;
+    }
+
     .buttons {
       display: flex;
       align-items: flex-end;
