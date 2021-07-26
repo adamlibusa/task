@@ -9,10 +9,14 @@ import {
   TextField,
   Typography
 } from '@material-ui/core';
-import {IChatMessage, IFlowStep} from './Chat.interface';
+import {IChatMessage, IFlowStep, IFlowStepOption} from './Chat.interface';
 import {finalStep, initialFlowStepMessages} from './flowStepMessages'
 import style from './Chat.module.scss'
 
+/**
+ * Remove whitespaces, interpunction and convert to lowercase
+ */
+const normalizeText = (text: string) => text.replace(/[\s\.!?\:\-\(\)]/g, '').toLowerCase()
 
 function Chat() {
   const [inputText, setInputText] = useState<string>('')
@@ -41,14 +45,14 @@ function Chat() {
       })
   }, [])
 
-  const postBotMessage = (nextStepId: number | boolean) => {
+  const postBotMessage = (nextStepId: number | boolean, messagesAsParam: IChatMessage[]) => {
     const flowStep = flowSteps.find(step => step.id === nextStepId) ?? finalStep
     const newMessage: IChatMessage = {
       flowStep,
       text: '',
       participant: 'bot'
     }
-    setMessages(messages.concat([newMessage]))
+    setMessages(messagesAsParam.concat([newMessage]))
   }
 
   const postUserMessage = (text: string) => {
@@ -60,19 +64,41 @@ function Chat() {
       text,
       participant: 'me'
     }
-    setMessages(messages.concat([newMessage]))
+    const newMessages: IChatMessage[] = messages.concat([newMessage])
+    setMessages(newMessages)
     setInputText('')
+
+    // Check if the user's message isn't an answer to one of the bot's questions
+    const lastMessageWithFlowStep = getLastMessageWithFlowStep()
+    const answerOption = findOptionThisUserMessageIsAnswerTo(text, lastMessageWithFlowStep?.flowStep)
+    if (answerOption) {
+      postBotMessage(answerOption.nextId, newMessages)
+    }
+  }
+
+  const getLastMessageWithFlowStep = () => {
+    const messagesWithFlowSteps = messages.filter(m => m.flowStep)
+    if (messagesWithFlowSteps) {
+      return messagesWithFlowSteps[messagesWithFlowSteps.length - 1]
+    } else {
+      return null
+    }
   }
 
   const isLastMessageWithFlowStep = (message: IChatMessage) => {
-    const messagesWithFlowSteps = messages.filter(m => m.flowStep)
-    if (messagesWithFlowSteps.length === 0) {
-      return false
-    }
-    if (messagesWithFlowSteps[messagesWithFlowSteps.length - 1]?.flowStep?.id === message?.flowStep?.id) {
+    const lastMessageWithFlowSteps = getLastMessageWithFlowStep()
+    if (lastMessageWithFlowSteps?.flowStep?.id === message?.flowStep?.id) {
       return true
     }
     return false
+  }
+
+  const findOptionThisUserMessageIsAnswerTo = (text: string, flowStep: IFlowStep | undefined) => {
+    if (!flowStep || !flowStep.valueOptions || flowStep.valueOptions.length === 0) {
+      return false
+    }
+    const bareText = normalizeText(text)
+    return flowStep?.valueOptions?.find(option => normalizeText(option.text) === bareText)
   }
 
   return (
@@ -98,7 +124,7 @@ function Chat() {
                   <Button
                     key={option.value.toString()}
                     size="small" color="primary"
-                    onClick={() => postBotMessage(option.nextId)}
+                    onClick={() => postBotMessage(option.nextId, messages)}
                     disabled={!isLastMessageWithFlowStep(message)}
                   >
                     {option.text}

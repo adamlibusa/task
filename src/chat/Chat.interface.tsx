@@ -4,11 +4,11 @@ export interface IFlowStep {
   text: string;
   uiType: 'button' | 'readonly';
   valueType?: 'boolean' | 'string' | 'number';
-  valueOptions?: IFlowStepOptions[];
+  valueOptions?: IFlowStepOption[];
   mediaUrl?: string;
 }
 
-export interface IFlowStepOptions {
+export interface IFlowStepOption {
   nextId: number | boolean;
   value: number | boolean | string;
   text: string;
