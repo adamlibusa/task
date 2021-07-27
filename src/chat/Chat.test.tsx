@@ -30,4 +30,34 @@ describe('Chat', () => {
     const secondCard = await screen.findByText(/Das tut mir leid, aber ich denke nicht, dass ich Ihnen helfen kann./)
     expect(secondCard).toBeInTheDocument()
   })
+
+  test('Chat calls the API via fetch', async () => {
+    render(<Chat />)
+    // Wait for the "Ja" button - just to make sure the first card is loaded
+    await screen.findByText('Ja')
+
+    const textInput = screen.getByTestId('chat-input')
+
+    fireEvent.change(textInput, {target: {value: 'ja'}})
+    screen.getByTestId('submit-button').click()
+    await screen.findByText('OK')
+
+    // At this point, we loaded the external flow steps (shouldn't do it in the tests, I know, I know) and can mock
+    // fetch to see it if gets called
+    const mockedFetch = jest.spyOn(global, 'fetch').mockResolvedValue(null)
+
+    fireEvent.change(textInput, {target: {value: 'ok'}})
+    screen.getByTestId('submit-button').click()
+    await screen.findByText(/Benötigen Sie eine Haftplichtversicherung?./)
+
+    fireEvent.change(textInput, {target: {value: 'nein'}})
+    screen.getByTestId('submit-button').click()
+    await screen.findByText(/Benötigen Sie eine Kasko?./)
+
+    expect(mockedFetch).toHaveBeenNthCalledWith(1, "https://virtserver.swaggerhub.com/L8475/task/1.0.0/conversation", {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{"name":"liability","value":false}'
+    })
+  })
 })
