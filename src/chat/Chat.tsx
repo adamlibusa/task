@@ -5,10 +5,10 @@ import {
   Container,
   TextField,
   Typography
-} from '@material-ui/core';
-import {IChatMessage, IFlowStep, IFlowStepOption} from './Chat.interface';
+} from '@material-ui/core'
+import {IChatMessage, IFlowStep, IFlowStepOption} from './Chat.interface'
 import {finalStep, initialFlowStepMessages} from './flowStepMessages'
-import ChatBubble from '../chat-bubble/ChatBubble';
+import ChatBubble from '../chat-bubble/ChatBubble'
 import style from './Chat.module.scss'
 
 /**
@@ -164,7 +164,7 @@ function Chat() {
         </div>
       </Box>
     </Container>
-  );
+  )
 }
 
-export default Chat;
+export default Chat

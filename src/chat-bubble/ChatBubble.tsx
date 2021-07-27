@@ -4,8 +4,8 @@ import {
   CardActions,
   CardContent,
   Typography
-} from '@material-ui/core';
-import {IChatMessage, IFlowStep, IFlowStepOption} from '../chat/Chat.interface';
+} from '@material-ui/core'
+import {IChatMessage, IFlowStep, IFlowStepOption} from '../chat/Chat.interface'
 import style from './ChatBubble.module.scss'
 
 interface ChatBubbleProps {
