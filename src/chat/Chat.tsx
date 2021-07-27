@@ -29,7 +29,7 @@ function Chat() {
   useEffect(() => {
     fetch('https://raw.githubusercontent.com/mzronek/task/main/flow.json')
       .then(data => data.json())
-      .then(loadedFlowSteps => loadedFlowSteps.map((step: IFlowStep) => ({...step, send: true}))) // We send the original flow steps
+      .then(enrichBoringLoadedDataWithGifs)
       .then(loadedFlowSteps => initialFlowStepMessages.concat(loadedFlowSteps))
       .then(allFlowSteps => allFlowSteps.sort((a: IFlowStep, b: IFlowStep) => a.id - b.id))
       .then(sortedFlowSteps => {
@@ -45,6 +45,20 @@ function Chat() {
         setMessages([newMessage])
       })
   }, [])
+
+  const enrichBoringLoadedDataWithGifs = (loadedFlowSteps: IFlowStep[]) => loadedFlowSteps.map((step: IFlowStep) => {
+    let mediaUrl
+    if (step.id === 100) {
+      mediaUrl = '/img/clumsy-jar-jar.gif'
+    } else if (step.id === 200) {
+      mediaUrl = '/img/obi-riding.gif'
+    }
+    return {
+      ...step,
+      send: true,
+      mediaUrl,
+    }
+  })
 
   const postBotMessage = async (startingStep: IFlowStep, option: IFlowStepOption, messagesAsParam: IChatMessage[]) => {
     const nextStepId: number | boolean = option.nextId
