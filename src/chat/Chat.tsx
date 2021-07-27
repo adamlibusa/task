@@ -135,8 +135,9 @@ function Chat() {
           Sie können auf die Buttons klicken, oder die Antwort als eine Message schreiben, um die Fragen zu antworten
         </Typography>
 
-        {messages.map(message => (
+        {messages.map((message, i) => (
           <ChatBubble
+            key={i}
             messages={messages}
             message={message}
             postBotMessage={postBotMessage}
