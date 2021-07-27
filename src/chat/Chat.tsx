@@ -146,6 +146,7 @@ function Chat() {
 
         <TextField
           id="chat-input"
+          inputProps={{ 'data-testid': 'chat-input' }} // For React Testing Library tests to work
           label="Write your message here"
           fullWidth
           value={inputText}
@@ -157,7 +158,7 @@ function Chat() {
           }}
         />
         <div className="buttons">
-          <Button className="send-button" variant="contained" color="primary"
+          <Button data-testid="submit-button" className="send-button" variant="contained" color="primary"
                   onClick={(e) => postUserMessage(inputText)}>
             Send
           </Button>
