@@ -18,7 +18,8 @@ export const initialFlowStepMessages: IFlowStep[] = [{
       "text": "Nein"
     }
   ],
-  "mediaUrl": undefined
+  "mediaUrl": undefined,
+  "send": false
 }, {
   "id": 50,
   "name": "",
@@ -32,7 +33,8 @@ export const initialFlowStepMessages: IFlowStep[] = [{
       "text": "OK"
     },
   ],
-  "mediaUrl": "/img/hello-there.gif"
+  "mediaUrl": "/img/hello-there.gif",
+  "send": false
 }, {
   "id": 51,
   "name": "",
@@ -46,7 +48,8 @@ export const initialFlowStepMessages: IFlowStep[] = [{
       "text": "OK :("
     },
   ],
-  "mediaUrl": "/img/you-were-the-chosen-one-obi-wan-kenobi.gif"
+  "mediaUrl": "/img/you-were-the-chosen-one-obi-wan-kenobi.gif",
+  "send": false
 }]
 
 export const finalStep: IFlowStep = {
@@ -56,5 +59,6 @@ export const finalStep: IFlowStep = {
   "uiType": "readonly",
   "valueType": undefined,
   "valueOptions": undefined,
-  "mediaUrl": "/img/bye.gif"
+  "mediaUrl": "/img/bye.gif",
+  "send": false
 }

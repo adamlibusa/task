@@ -6,6 +6,7 @@ export interface IFlowStep {
   valueType?: 'boolean' | 'string' | 'number';
   valueOptions?: IFlowStepOption[];
   mediaUrl?: string;
+  send: boolean;
 }
 
 export interface IFlowStepOption {

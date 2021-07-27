@@ -29,6 +29,7 @@ function Chat() {
   useEffect(() => {
     fetch('https://raw.githubusercontent.com/mzronek/task/main/flow.json')
       .then(data => data.json())
+      .then(loadedFlowSteps => loadedFlowSteps.map((step: IFlowStep) => ({...step, send: true}))) // We send the original flow steps
       .then(loadedFlowSteps => initialFlowStepMessages.concat(loadedFlowSteps))
       .then(allFlowSteps => allFlowSteps.sort((a: IFlowStep, b: IFlowStep) => a.id - b.id))
       .then(sortedFlowSteps => {
@@ -45,8 +46,13 @@ function Chat() {
       })
   }, [])
 
-  const postBotMessage = (nextStepId: number | boolean, messagesAsParam: IChatMessage[]) => {
+  const postBotMessage = async (startingStep: IFlowStep, option: IFlowStepOption, messagesAsParam: IChatMessage[]) => {
+    const nextStepId: number | boolean = option.nextId
+
     const flowStep = flowSteps.find(step => step.id === nextStepId) ?? finalStep
+    if (startingStep.send) {
+      await sendChoice(startingStep, option)
+    }
     const newMessage: IChatMessage = {
       flowStep,
       text: '',
@@ -71,8 +77,8 @@ function Chat() {
     // Check if the user's message isn't an answer to one of the bot's questions
     const lastMessageWithFlowStep = getLastMessageWithFlowStep()
     const answerOption = findOptionThisUserMessageIsAnswerTo(text, lastMessageWithFlowStep?.flowStep)
-    if (answerOption) {
-      postBotMessage(answerOption.nextId, newMessages)
+    if (lastMessageWithFlowStep?.flowStep && answerOption) {
+      postBotMessage(lastMessageWithFlowStep.flowStep, answerOption, newMessages)
     }
   }
 
@@ -101,6 +107,15 @@ function Chat() {
     return flowStep?.valueOptions?.find(option => normalizeText(option.text) === bareText)
   }
 
+  const sendChoice = async (flowStep: IFlowStep, option: IFlowStepOption) =>
+    fetch('https://virtserver.swaggerhub.com/L8475/task/1.0.0/conversation', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({name: flowStep.name, value: option.value})
+    })
+
   return (
     <Container className={style.Chat}>
       <Box my={4}>
@@ -124,7 +139,7 @@ function Chat() {
                   <Button
                     key={option.value.toString()}
                     size="small" color="primary"
-                    onClick={() => postBotMessage(option.nextId, messages)}
+                    onClick={() => postBotMessage(message?.flowStep as IFlowStep, option, messages)}
                     disabled={!isLastMessageWithFlowStep(message)}
                   >
                     {option.text}
