@@ -2,15 +2,13 @@ import {useEffect, useState} from 'react'
 import {
   Box,
   Button,
-  Card,
-  CardActions,
-  CardContent,
   Container,
   TextField,
   Typography
 } from '@material-ui/core';
 import {IChatMessage, IFlowStep, IFlowStepOption} from './Chat.interface';
 import {finalStep, initialFlowStepMessages} from './flowStepMessages'
+import ChatBubble from '../chat-bubble/ChatBubble';
 import style from './Chat.module.scss'
 
 /**
@@ -138,30 +136,12 @@ function Chat() {
         </Typography>
 
         {messages.map(message => (
-          <Card className="chat-bubble" key={messages.indexOf(message)}>
-            <CardContent>
-              {message?.flowStep?.mediaUrl ? (
-                <img src={message?.flowStep?.mediaUrl} alt="Not the droids you were looking for" title="Not the droids you were looking for" />
-              ) : null}
-              <Typography variant="body2" color="textSecondary" component="p">
-                {message?.flowStep?.text ?? message.text}
-              </Typography>
-            </CardContent>
-            <CardActions>
-              {message?.flowStep?.uiType === 'button' ? (
-                message?.flowStep?.valueOptions?.map(option => (
-                  <Button
-                    key={option.value.toString()}
-                    size="small" color="primary"
-                    onClick={() => postBotMessage(message?.flowStep as IFlowStep, option, messages)}
-                    disabled={!isLastMessageWithFlowStep(message)}
-                  >
-                    {option.text}
-                  </Button>
-                ))
-              ) : ''}
-            </CardActions>
-          </Card>
+          <ChatBubble
+            messages={messages}
+            message={message}
+            postBotMessage={postBotMessage}
+            isLastMessageWithFlowStep={isLastMessageWithFlowStep}
+          />
         ))}
 
         <TextField

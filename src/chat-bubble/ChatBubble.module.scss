@@ -1,0 +1,7 @@
+@import '../variables';
+
+:global {
+  :local(.ChatBubble) {
+    margin-block: $padding-m;
+  }
+}
