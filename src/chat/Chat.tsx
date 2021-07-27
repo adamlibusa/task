@@ -132,7 +132,7 @@ function Chat() {
     <Container className={style.Chat}>
       <Box my={4}>
         <Typography variant="h4" component="h1" gutterBottom>
-          Write our bot some stuff
+          Sie können auf die Buttons klicken, oder die Antwort als eine Message schreiben, um die Fragen zu antworten
         </Typography>
 
         {messages.map(message => (
